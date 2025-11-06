@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: imageName
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      ip-service: imageName
+  template:
+    metadata:
+      labels:
+        ip-service: imageName
+    spec:
+      containers:
+        - name: imageName
+          image: {{repositoryFullPath}}/imageName:latest
+          ports:
+            - containerPort: 8080
+          resources:
+            limits:
+              memory: 350Mi
+            requests:
+              memory: 300Mi
+          envFrom:
+            - secretRef:
+                name: cluster-secrets
+            - configMapRef:
+                name: cluster-map
+            - configMapRef:
+                name: hosts-map
+      imagePullSecrets:
+        - name: tecnoregistry
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: imageName-service
+spec:
+  type: ClusterIP
+  selector:
+    ip-service: imageName
+  ports:
+    - port: 8080
+      targetPort: 8080

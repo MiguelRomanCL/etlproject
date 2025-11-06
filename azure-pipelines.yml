@@ -1,0 +1,22 @@
+trigger:
+  - main
+
+variables:
+  imageName: "msw-kpi-conversion"
+  imageTag: "v0.1.0-$(build.buildId)"
+  projectName: "$(build.repository.name)"
+pool:
+  vmImage: ubuntu-latest
+
+resources:
+  repositories:
+    - repository: pipelines
+      type: git
+      name: SPGA/pipelines
+
+stages:
+  - template: R-python.yaml@pipelines
+    parameters:
+      imageName: $(imageName)
+      imageTag: $(imageTag)
+      projectName: $(projectName)
