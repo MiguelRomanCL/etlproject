@@ -1,9 +1,12 @@
 # External
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from fastapi import FastAPI
 
 # Project
 from app.routers import ROUTERS
-
 
 app = FastAPI()
 

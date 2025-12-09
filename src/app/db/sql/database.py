@@ -15,7 +15,6 @@ from app.config import (
     PROJECT_NAME,
 )
 
-
 DATABASE_URL = f"postgresql+psycopg2://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_SERVER}/{POSTGRES_DATABASE}?application_name={PROJECT_NAME}"
 engine = create_engine(DATABASE_URL, echo=True)
 
@@ -32,11 +31,18 @@ def get_session(tenant_schema: str) -> Generator[Session, None, None]:
 
 
 async def get_db(req: Request) -> AsyncGenerator[Session, None]:
-    body = await req.json()
+    try:
+        body = await req.json()
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid JSON body",
+        )
+
     if "client" not in body:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Missing keys in request body",
+            detail="Missing 'client' key in request body",
         )
     tenant = body["client"]
     with get_session(tenant) as db:

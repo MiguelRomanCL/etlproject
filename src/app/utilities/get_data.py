@@ -4,6 +4,7 @@ from typing import Any
 # External
 import polars as pl
 from sqlmodel import Session
+from pathlib import Path
 
 # Project
 from app.config import LOGGER
@@ -36,18 +37,19 @@ def get_weights_consumptions(session: Session, id_breeding_list: list[int]) -> l
         raise
 
 
-def get_standard() -> pl.DataFrame:
-    pollos = pl.read_csv("maestroestandargenetica_202510160912_pollos.csv")
-    cerdos = pl.read_csv("maestroestandargenetica_202510161619_cerdos.csv")
-    pollos = pollos.with_columns(id_stage=pl.lit(1))
-    cerdos = cerdos.with_columns(id_stage=pl.lit(2))
+def get_standard():
+    base = Path(__file__).resolve().parent.parent.parent  # ← carpeta src/
+    pollos = base / "maestroestandargenetica_202510160912_pollos.csv"
+    cerdos = base / "maestroestandargenetica_202510161619_cerdos.csv"
 
+    pollos_df = pl.read_csv(pollos).with_columns(pl.lit(1).alias("id_stage"))
+    cerdos_df = pl.read_csv(cerdos).with_columns(pl.lit(2).alias("id_stage"))
     std = pl.concat(
         items=[
-            pollos[
+            pollos_df[
                 "edad", "sexo", "nombreGenetica", "conversion", "conversionAcumulada", "id_stage"
             ],
-            cerdos[
+            cerdos_df[
                 "edad", "sexo", "nombreGenetica", "conversion", "conversionAcumulada", "id_stage"
             ],
         ]
